@@ -1,0 +1,8 @@
+ID1  = 0,0
+ID2 = 10,0
+ID3 = 5,5
+ID4 = 5,5 
+boxB is on boxA
+
+
+請幫我將boxA放到boxB上

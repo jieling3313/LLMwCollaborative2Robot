@@ -1,0 +1,155 @@
+(define (domain multi-robot-domain)
+  (:requirements :strips :typing)
+  ;; :strips 表示使用最基本的條件-效果規劃
+  ;; :typing 允許我們使用型別 (robot, location, item)
+
+  (:types
+    robot
+    location
+    item
+  )
+
+  (:predicates
+    ;; 機器人 r 是否位於位置 l
+    (robot-at ?r - robot ?l - location)
+
+    ;; 物品 o 是否在某位置 l 的「高位」(high) / 「低位」(low)
+    (object-at-high ?o - item ?l - location)
+    (object-at-low ?o - item ?l - location)
+
+    ;; 機器人 r 是否正拿著物品 o
+    (holding ?r - robot ?o - item)
+
+    ;; 機器人 r 是否手是空的
+    (handempty ?r - robot)
+
+    ;; 位置 l 的高位 / 低位 是否是空的
+    (high-empty ?l - location)
+    (low-empty ?l - location)
+
+    ;; 用於標記任務是否完成
+    (mission-complete)
+
+    ;; 子位置 lsub 能操作主要位置 lobj
+    (accessible ?lsub - location ?lobj - location)
+
+    ;; --------------------------------------------------------------
+    ;; 表示該位置沒有任何機器人佔據
+    ;; --------------------------------------------------------------
+    (robot-location-clear ?l - location)
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 1. move_to(目標地點)
+  ;;    機器人由所在位置移動到指定位置
+  ;;---------------------------------------------------------------------
+  (:action move_to
+    :parameters (?r - robot ?from - location ?to - location)
+    :precondition (and
+      (robot-at ?r ?from)
+      (robot-location-clear ?to)
+    )
+    :effect (and
+      (not (robot-at ?r ?from))
+      (robot-at ?r ?to)
+      (robot-location-clear ?from)
+      (not (robot-location-clear ?to))
+    )
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 2. pick_high(物品)
+  (:action pick_high
+    :parameters (?r - robot ?o - item ?lsub - location ?lobj - location)
+    :precondition (and
+      (robot-at ?r ?lsub)
+      (accessible ?lsub ?lobj)
+      (object-at-high ?o ?lobj)
+      (handempty ?r)
+    )
+    :effect (and
+      (holding ?r ?o)
+      (not (object-at-high ?o ?lobj))
+      (not (handempty ?r))
+      (high-empty ?lobj)
+    )
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 3. pick_low(物品)
+  (:action pick_low
+    :parameters (?r - robot ?o - item ?lsub - location ?lobj - location)
+    :precondition (and
+      (robot-at ?r ?lsub)
+      (accessible ?lsub ?lobj)
+      (object-at-low ?o ?lobj)
+      (handempty ?r)
+      (high-empty ?lobj) ;; 
+    )
+    :effect (and
+      (holding ?r ?o)
+      (not (object-at-low ?o ?lobj))
+      (not (handempty ?r))
+      (low-empty ?lobj)
+    )
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 4. place_high(物品, 位置)
+  (:action place_high
+    :parameters (?r - robot ?o - item ?lsub - location ?lobj - location)
+    :precondition (and
+      (robot-at ?r ?lsub)
+      (accessible ?lsub ?lobj)
+      (holding ?r ?o)
+      (high-empty ?lobj)
+      (not (low-empty ?lobj)) 
+    )
+    :effect (and
+      (object-at-high ?o ?lobj)
+      (not (holding ?r ?o))
+      (handempty ?r)
+      (not (high-empty ?lobj))
+    )
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 5. place_low(物品, 位置)
+  (:action place_low
+    :parameters (?r - robot ?o - item ?lsub - location ?lobj - location)
+    :precondition (and
+      (robot-at ?r ?lsub)
+      (accessible ?lsub ?lobj)
+      (holding ?r ?o)
+      (low-empty ?lobj)
+    )
+    :effect (and
+      (object-at-low ?o ?lobj)
+      (not (holding ?r ?o))
+      (handempty ?r)
+      (not (low-empty ?lobj))
+    )
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 6. hold(物品)
+  (:action hold
+    :parameters (?r - robot ?o - item)
+    :precondition (and
+      (holding ?r ?o)
+    )
+    :effect (and
+      ;; 不改變任何狀態
+    )
+  )
+
+  ;;---------------------------------------------------------------------
+  ;; 7. done()
+  (:action done
+    :parameters ()
+    :precondition (and)
+    :effect (and
+      (mission-complete)
+    )
+  )
+)

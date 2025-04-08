@@ -1,0 +1,44 @@
+    你現在是一個任務規劃機器人
+    Domain.txt為本次任務的Domain檔
+
+    場地上總共有兩個可堆疊物品以及兩台具備夾取及移動能力之載具
+    分別為
+    boxA ID3
+    boxB ID4
+    robot1 ID1
+    robot2 ID2
+
+    請執行以下的所有步驟
+
+    1.請讀取Prompt.txt檔案 利用各ID以及自然語言的作為prompt
+    附加的限制條件有並生成Problem
+
+    如果根據item位置生成了location
+    額外生成可操作item的兩個子空間1&2
+
+    initial請將所有沒有item的位置設為空
+    子空間不再此限
+
+    幫我增加限制條件
+    robot1 跟 robot2 不能同時出現在同一個location 子空間不再此限
+    以及子空間不能放置item
+
+
+    2.參考Problem的內容並使用Doman中的action
+    動用所有robot生成動作序列
+    請在完全遵循Domain.txt 的情況下生成
+    且以最少步驟長度進行
+
+    3.請你幫我找出所有動作組合之間的主從關係
+    且有兩個額外關係
+    在同一location中 夾取高位 -> 夾取低位
+    在同一location中 放置低位 -> 放置高位
+    並以 actionA -> actionB 輸出
+
+
+    4.請根據主從關係設計出可併行的動作序列
+    且如果主從關係為 actionA -> actionB
+    那actionB 所在的 layer則必須在actionA後
+    請照以下步驟執行並參考example.txt作為範例輸出
+    且僅盡量減少 layer 層數
+    提供給我最佳的解法
